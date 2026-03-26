@@ -1,0 +1,15 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+#new-peer {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.tasksNchat {
+  display: flex;
+  gap: 5em;
+}

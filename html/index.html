@@ -3,19 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
   <title>Document</title>
 </head>
 <body>
-  <h1>JEPJGEP</h1>
+  <span style="position: absolute;" id="new-peer"></span>
+  <h1 id="selfId"></h1>
 
-  <input type="text" name="text" id="text">
-  <button id="send-button">button</button>
+  <input type="text" name="recipient" id="recipient" placeholder="recipient">
+  <input type="text" name="message" id="message" placeholder="message">
+  <button id="send-button">send</button>
 
-  <input type="text" name="bounty-header" id="bounty-header">
-  <input type="text" name="bounty-body" id="bounty-body">
-  <button id="bounty-button">bounty</button>
+  <input type="text" name="task-header" id="task-header" placeholder="header">
+  <input type="text" name="task-desc" id="task-desc" placeholder="description">
+  <button id="task-button">create</button>
 
-  <div id="bounties"></div>
+  <div class="tasksNchat">
+    <div id="tasks">
+      <h1>Tasks</h1>
+    </div>
+    <div id="chat">
+      <h1>Chat</h1>
+    </div>
+  </div>
 
   <script type="module" src="script.js"></script>
 </body>
