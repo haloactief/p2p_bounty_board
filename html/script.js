@@ -7,16 +7,18 @@ import { joinRoom, selfId } from 'https://esm.run/@trystero-p2p/torrent';
 
 const bountyContainer = document.getElementById("bounties");
 var myBounties = localStorage.getItem("mb") !== null ? JSON.parse(localStorage.getItem("mb")) : [];
+var otherBounties = [];
 
-const updateBountyContainer = (bounties) => {
+const updateBountyContainer = () => {
+  const bounties = [...myBounties, ...otherBounties];
   bountyContainer.innerHTML = "";
   bounties.forEach(obj => {
     const bounty = document.createElement("div");
     const bountyHeader = document.createElement("span");
-    bountyHeader.textContent = JSON.parse(obj).header;
+    bountyHeader.textContent = obj.header;
 
     const bountyBody = document.createElement("p");
-    bountyBody.textContent = JSON.parse(obj).body;
+    bountyBody.textContent = obj.body;
 
     bounty.appendChild(bountyHeader);
     bounty.appendChild(bountyBody);
@@ -47,18 +49,24 @@ const [sendM, getM] = room.makeAction('chat')
 
 room.onPeerJoin(peerId => {
   console.log(`new peer: ${peerId}`);
+  sendBounties();
 })
 
 const sendMessage = () => {
   sendM({type: "gm", body: document.getElementById("text").value});
 }
-
 document.getElementById("send-button").addEventListener("click", sendMessage);
 
 getM((data, peerId) => {
   switch(data.type) {
   case "b":
-    console.log("b");
+    data.body.forEach(bounty => {
+      const exist = otherBounties.some(obj => obj.header === bounty.header);
+      if(!exist) {
+        otherBounties.push(bounty);
+      }
+      updateBountyContainer();
+    })
     break;
   case "m":
     console.log(`${peerId}: ${data.body} ${Date.now()} ${data.type}`);
@@ -73,17 +81,21 @@ const createBounty = () => {
   const bountyHeader = document.getElementById("bounty-header").value;
   const bountyBody = document.getElementById("bounty-body").value;
 
-  const exists = myBounties.some(obj => JSON.parse(obj).header === bountyHeader);
+  const exists = myBounties.some(obj => obj.header === bountyHeader);
   if (exists) return;
 
-  const bountyObj = JSON.stringify({
+  const bountyObj = {
     header: bountyHeader,
     body: bountyBody
-  });
+  };
   myBounties.push(bountyObj);
   localStorage.setItem("mb", JSON.stringify(myBounties));
-  sendM({type: "b", body: JSON.stringify(myBounties), peerId: selfId});
-  updateBountyContainer(myBounties);
+  sendBounties();
+  updateBountyContainer();
+}
+
+const sendBounties = () => {
+  sendM({type: "b", body: myBounties, peerId: selfId});
 }
 
 document.getElementById("bounty-button").addEventListener("click", createBounty);
