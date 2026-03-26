@@ -11,7 +11,6 @@ var myBounties = localStorage.getItem("mb") !== null ? JSON.parse(localStorage.g
 const updateBountyContainer = (bounties) => {
   bountyContainer.innerHTML = "";
   bounties.forEach(obj => {
-    console.log(obj);
     const bounty = document.createElement("div");
     const bountyHeader = document.createElement("span");
     bountyHeader.textContent = JSON.parse(obj).header;
