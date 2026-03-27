@@ -8,22 +8,35 @@
 </head>
 <body>
   <span style="position: absolute;" id="new-peer"></span>
-  <h1 id="selfId"></h1>
+  
+  <div class="content">
+    <h2 id="selfId"></h2>
 
-  <input type="text" name="recipient" id="recipient" placeholder="recipient">
-  <input type="text" name="message" id="message" placeholder="message">
-  <button id="send-button">send</button>
+    <div class="send-forms">
+      <div class="controls">
+        <input type="text" name="recipient" id="recipient" placeholder="recipient">
+        <input type="text" name="message" id="message" placeholder="message">
+        <button id="send-button">send</button>
+      </div>
 
-  <input type="text" name="task-header" id="task-header" placeholder="header">
-  <input type="text" name="task-desc" id="task-desc" placeholder="description">
-  <button id="task-button">create</button>
-
-  <div class="tasksNchat">
-    <div id="tasks">
-      <h1>Tasks</h1>
+      <div class="controls">
+        <input type="text" name="task-header" id="task-header" placeholder="header">
+        <input type="text" name="task-desc" id="task-desc" placeholder="description">
+        <button id="task-button">create</button>
+      </div>
     </div>
-    <div id="chat">
-      <h1>Chat</h1>
+
+    <div class="tasksNchat">
+      <div>
+        <h2>Tasks</h2>
+        <div id="tasks">
+        </div>
+      </div>
+      <div>
+        <h2>Chat</h2>
+        <div id="chat">
+        </div>
+      </div>
     </div>
   </div>
 

@@ -1,15 +1,67 @@
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
-#new-peer {
+#selfId {
   position: absolute;
   right: 0;
   top: 0;
 }
 
+#new-peer {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.content {
+  display: grid;
+  gap: 1em;
+  position: relative;
+
+  grid-template-rows: auto minmax(0, 1fr);
+
+  padding: 2em;
+  height: 100dvh;
+}
+
+body {
+  min-height: 100dvh;
+  min-width: 100dvw;
+}
+
 .tasksNchat {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
+  gap: 2em;
+}
+
+.tasksNchat > div {
+  background: rgb(200, 200, 255);
+  min-height: 0;
+  overflow-y: auto;
+}
+
+#tasks, #chat {
+  display: grid;
+  grid-template-rows: 1fr;
+  gap: .5em;
+}
+
+.task, .message {
+  padding: .5em;
+  background: rgb(255, 200, 255);
+}
+
+.send-forms {
   display: flex;
-  gap: 5em;
+  gap: .5em;
+}
+
+.controls {
+  display: grid;
+  gap: .2em;
 }

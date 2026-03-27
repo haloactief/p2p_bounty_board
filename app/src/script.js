@@ -13,10 +13,11 @@ var otherTasks = [];
 
 const updateTaskContainer = () => {
   const tasks = [...myTasks, ...otherTasks];
-  tasksContainer.innerHTML = "<h1>Tasks</h1>";
+  tasksContainer.innerHTML = "";
   tasks.forEach(obj => {
     const task = document.createElement("div");
-    const taskHeader = document.createElement("h1");
+    task.className = "task"
+    const taskHeader = document.createElement("h3");
     taskHeader.textContent = obj.header;
 
     const taskDesc = document.createElement("p");
@@ -54,6 +55,7 @@ document.getElementById("selfId").innerText = `your id: ${selfId}`;
 const [sendM, getM] = room.makeAction('chat')
 
 room.onPeerJoin(peerId => {
+  newPeerSpan.style.display = "block";
   newPeerSpan.textContent = newPeerSpan.textContent + ` new peer: ${peerId}`;
   setTimeout(() => {
     newPeerSpan.style.display = "none";
@@ -71,6 +73,7 @@ const sendMessage = () => {
   }
 
   const mdiv = document.createElement("div");
+  mdiv.className = "message";
   mdiv.textContent = recipientId ? `you to ${recipientId}: ${message} ${Date.now()}` : `you to all: ${message} ${Date.now()}`;
   chat.appendChild(mdiv);
 }
@@ -90,6 +93,7 @@ getM((data, peerId) => {
     break;
   case "m":
     const message = document.createElement("div");
+    message.className = "message";
     message.textContent = data.mtype === "private" ? `${peerId} to you: ${data.body} ${Date.now()}` : `${peerId} to all: ${data.body} ${Date.now()}`;
     chat.appendChild(message);
     break;
