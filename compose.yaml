@@ -8,6 +8,8 @@ services:
   nginx:
     build: ./app
     restart: always
+    environment:
+      - DOMAIN=domain
     ports:
       - 80:80
       - 443:443

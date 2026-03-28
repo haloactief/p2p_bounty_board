@@ -38,11 +38,11 @@ updateTaskContainer();
 
 const config = {
   appId: 'abebe',
-  relayUrls: [`wss://domain/ws/`] // <-- change_domain
+  relayUrls: [`wss://${import.meta.env.DOMAIN}/ws/`] // <-- change_domain
   // rtcConfig: {
   //   iceServers: [
   //     {  // need this if p2p fails
-  //       urls: `turn:domain:3478`, //  <-- change_domain
+  //       urls: `turn:${import.meta.env.DOMAIN}:3478`, //  <-- change_domain
   //       username: "stupidboy",
   //       credential: "hardpassword"
   //     }
