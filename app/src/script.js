@@ -31,11 +31,76 @@ const openDB = () => {
   
       tasksStore.createIndex("header", "header", { unique: false });
       tasksStore.createIndex("body", "body", { unique: false });
+      tasksStore.createIndex("createdBy", "createdBy", { unique: false });
+      tasksStore.createIndex("createdAt", "cretedAt", { unique: false });
+      tasksStore.createIndex("signature", "signature", { unique: true });
+      tasksStore.createIndex("signerPublicKey", "signerPublicKey", { unique: false});
+
+      db.createObjectStore("identity", {keyPath: "id"});
     }
   })
 }
 
+let myKeyPair = null;
+let myPublicKeyRaw = null;
+let myPublicKeyBase64 = null;
+const IDENTITY_KEY = "myEd25519Identity";
+
+const publicKeyToPeer = new Map();
+const peerToPublicKey = new Map();
+
+const getOrCreateKeyPair = async () => {
+  if(myKeyPair) return;
+
+  await dbReady;
+
+  if(!db) {
+    throw new Error("Database failed to open");
+  }
+
+  const tx = db.transaction("identity", "readonly");
+  const store = tx.objectStore("identity");
+
+  const stored = await new Promise((resolve, reject) => {
+    const req = store.get(IDENTITY_KEY);
+    req.onsuccess = (event) => {
+      resolve(event.target.result);
+    };
+    req.onerror = (event) => {
+      resolve(null);
+    }
+  })
+
+  if(stored && stored.privateKey && stored.publicKey) {
+    myKeyPair = {
+      privateKey: await crypto.subtle.importKey("jwk", stored.privateKey, {name: "Ed25519"}, false, ["sign"]),
+      publicKey: await crypto.subtle.importKey("jwk", stored.publicKey, {name: "Ed25519"}, true, ["verify"])
+    };
+  } else {
+    myKeyPair = await crypto.subtle.generateKey({name: "Ed25519"}, true, ["sign", "verify"]);
+    const privateJWK = await crypto.subtle.exportKey("jwk", myKeyPair.privateKey);
+    const publicJWK = await crypto.subtle.exportKey("jwk", myKeyPair.publicKey);
+  
+    const wTx = db.transaction("identity", "readwrite");
+    wTx.objectStore("identity").put({
+      id: IDENTITY_KEY,
+      privateKey: privateJWK,
+      publicKey: publicJWK
+    });
+  }
+
+  myPublicKeyRaw = new Uint8Array(await crypto.subtle.exportKey("raw", myKeyPair.publicKey));
+  myPublicKeyBase64 = btoa(String.fromCharCode(...myPublicKeyRaw));
+
+  document.getElementById("selfId").innerText = `your id: ${myPublicKeyBase64.slice(0, 16)}`;
+};
+
 let dbReady = openDB();
+dbReady.then(() => {
+  getOrCreateKeyPair().catch(err => {
+    console.error(err);
+  })
+})
 
 const whenDBReady = (callback) => {
   dbReady.then(() => callback());
@@ -123,7 +188,6 @@ const config = {
   // }
 };
 const room = joinRoom(config, 'yoyo');
-document.getElementById("selfId").innerText = `your id: ${selfId}`;
 
 const [sendM, getM] = room.makeAction('chat')
 
@@ -133,8 +197,40 @@ room.onPeerJoin(peerId => {
   setTimeout(() => {
     newPeerSpan.style.display = "none";
   }, 5000);
-  sendMyTasks();
+  sendM({type: "ri"}, peerId);
+  if (myTasks.length > 0) {
+    setTimeout(broadcastTasks, 500);
+  }
 })
+
+const signMessage = async (data) => {
+  if (!myKeyPair) await getOrCreateKeyPair();
+
+  const encoder = new TextEncoder();
+  const dataBuffer = typeof(data) === "string" ? encoder.encode(data) : encoder.encode(JSON.stringify(data));
+
+  const signature = await crypto.subtle.sign({name: "Ed25519"}, myKeyPair.privateKey, dataBuffer);
+
+  return {
+    signature: Array.from(new Uint8Array(signature)),
+    publicKey: Array.from(myPublicKeyRaw),
+    timestamp: Date.now()
+  }
+}
+
+const verifySignature = async (data, signatureArr, publicKeyArr) => {
+  try {
+    const publicKey = await crypto.subtle.importKey("raw", new Uint8Array(publicKeyArr), {name: "Ed25519"}, true, ["verify"]);
+
+    const encoder = new TextEncoder();
+    const dataBuffer = typeof(data) === "string" ? encoder.encode(data) : encoder.encode(JSON.stringify(data));
+
+    return await crypto.subtle.verify({name: "Ed25519"}, publicKey, new Uint8Array(signatureArr), dataBuffer);
+  } catch (e) {
+    console.warn("Signature verification failed ", e);
+    return false;
+  }
+}
 
 const sendMessage = () => {
   const recipientId = document.getElementById("recipient").value;
@@ -152,22 +248,53 @@ const sendMessage = () => {
 }
 document.getElementById("send-button").addEventListener("click", sendMessage);
 
-getM((data, peerId) => {
+getM(async (data, peerId) => {
   switch(data.type) {
+  case "ri":
+    sendM({type: "mi", publicKey: myPublicKeyBase64}, peerId);
+    break;
+  case "mi":
+    publicKeyToPeer.set(data.publicKey, peerId);
+    peerToPublicKey.set(peerId, data.publicKey);
+    break;
   case "b":
-    data.body.forEach(task => {
-      const exist = otherTasks.some(obj => obj.id === task.id);
-      if(!exist) {
-        const taskWPeer = {...task, peerId: data.peerId};
-        otherTasks.push(taskWPeer);
+    for(const task of data.payload || []) {
+      if (myTasks.some(t => t.id === task.id) || 
+          otherTasks.some(t => t.id === task.id)) {
+        continue;
       }
-      updateTaskContainer();
-    })
+
+      if(task.signature && task.signerPublicKey) {
+        let isValid = true;
+        const dataToVerify = {
+          id: task.id,
+          header: task.header,
+          body: task.body,
+          createdBy: task.createdBy,
+          createdAt: task.createdAt
+        };
+        isValid = await verifySignature(dataToVerify, task.signature, task.signerPublicKey);
+
+        if(!isValid) {
+          console.warn("Invalid signature on task ", task.id);
+          continue;
+        }
+      } else {
+        console.warn("Task without signature: ", task.id);
+      }
+      const exist = otherTasks.some(t => t.id === task.id);
+      if(!exist) {
+        otherTasks.push({...task});
+      }
+    }
+    updateTaskContainer();
     break;
   case "m":
+    const senderPublicKey = peerToPublicKey.get(peerId) || peerId;
+
     const message = document.createElement("div");
     message.className = "message";
-    message.textContent = data.mtype === "private" ? `${peerId} to you: ${data.body} ${Date.now()}` : `${peerId} to all: ${data.body} ${Date.now()}`;
+    message.textContent = data.mtype === "private" ? `${senderPublicKey.slice(0, 16)} to you: ${data.body} ${Date.now()}` : `${senderPublicKey.slice(0, 16)} to all: ${data.body} ${Date.now()}`;
     chat.appendChild(message);
     break;
   default:
@@ -183,29 +310,42 @@ const addTaskToDB = (task) => {
   store.add(task);
 }
 
-const createTask = () => {
-  const id = crypto.randomUUID();
+const createTask = async () => {
   const taskHeader = document.getElementById("task-header").value;
   const taskBody = document.getElementById("task-desc").value;
 
-  const exists = myTasks.some(obj => obj.id === id);
-  if (exists) return;
-
   const taskObj = {
-    id: id,
+    id: crypto.randomUUID(),
     header: taskHeader,
-    body: taskBody
+    body: taskBody,
+    createdBy: myPublicKeyBase64,
+    createdAt: Date.now()
   };
+
+  const sigData = {...taskObj};
+  const signed = await signMessage(sigData);
+
+  const signedTask = {
+    ...taskObj,
+    signature: signed.signature,
+    signerPublicKey: signed.publicKey
+  }
+
+  myTasks.push(signedTask);
   whenDBReady(() => {
-    addTaskToDB(taskObj);
+    addTaskToDB(signedTask);
   })
 
   broadcastTasks();
   updateTaskContainer();
+
+  document.getElementById("task-header").value = "";
+  document.getElementById("task-desc").value = "";
 }
 
-const broadcastTasks = () => {
-  sendM({type: "b", mtype: "global", body: myTasks, peerId: selfId}); // gonna leave it like this for now
+const broadcastTasks = async () => {
+  if(myTasks.length === 0) return;
+  sendM({type: "b", mtype: "global", payload: myTasks});
 }
 
 document.getElementById("task-button").addEventListener("click", createTask);
