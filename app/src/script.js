@@ -1,4 +1,4 @@
-import { joinRoom, selfId } from 'https://esm.run/@trystero-p2p/torrent';
+import { joinRoom, selfId } from '@trystero-p2p/torrent';
 // import WebTorrent from 'https://esm.sh/webtorrent/dist/webtorrent.min.js';
 
 // store tasks in local storage
@@ -8,8 +8,77 @@ import { joinRoom, selfId } from 'https://esm.run/@trystero-p2p/torrent';
 const newPeerSpan = document.getElementById("new-peer");
 const tasksContainer = document.getElementById("tasks");
 const chat = document.getElementById("chat");
-var myTasks = localStorage.getItem("mt") !== null ? JSON.parse(localStorage.getItem("mt")) : [];
+
+var db;
+
+const openDB = () => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("p2pdb", 3);
+    request.onerror = () => {
+      console.log("fuck u");
+    }
+  
+    request.onsuccess = (event) => {
+      db = event.target.result;
+      resolve(db);
+    }
+  
+    request.onupgradeneeded = (event) => {
+      console.log("thank god");
+      db = event.target.result;
+  
+      const tasksStore = db.createObjectStore("tasks", {keyPath: "id"});
+  
+      tasksStore.createIndex("header", "header", { unique: false });
+      tasksStore.createIndex("body", "body", { unique: false });
+    }
+  })
+}
+
+let dbReady = openDB();
+
+const whenDBReady = (callback) => {
+  dbReady.then(() => callback());
+}
+
+var myTasks = [];
 var otherTasks = [];
+
+const getTasksFromDB = () => {
+  if(!db) {
+    console.warn("Database is not ready!");
+    whenDBReady(() => {
+      getTasksFromDB();
+    })
+  }
+
+  const objectStore = db.transaction("tasks").objectStore("tasks");
+  objectStore.openCursor().onsuccess = (event) => {
+    const cursor = event.target.result;
+    if(cursor) {
+      // console.log(cursor.key + " " + cursor.value.header + " " + cursor.value.body);
+      const task = {
+        id: cursor.key,
+        header: cursor.value.header,
+        body: cursor.value.body
+      }
+
+      const exists = myTasks.some(t => t.id === task.id);
+      if (!exists) {
+        myTasks.push(task);
+      }
+
+      cursor.continue();
+    } else {
+      // console.log("No more entries!");
+      updateTaskContainer();
+    }
+  }
+}
+
+whenDBReady(() => {
+  getTasksFromDB();
+})
 
 const updateTaskContainer = () => {
   const tasks = [...myTasks, ...otherTasks];
@@ -26,9 +95,13 @@ const updateTaskContainer = () => {
     task.appendChild(taskHeader);
     task.appendChild(taskDesc);
 
-    const peer = document.createElement("span");
+    const peer = document.createElement("p");
     peer.textContent = obj.peerId ? `peer: ${obj.peerId}` : `peer: me`;
     task.appendChild(peer);
+
+    const taskId = document.createElement("p");
+    taskId.textContent = `taskId: ${obj.id}`
+    task.appendChild(taskId);
 
     tasksContainer.appendChild(task);
   })
@@ -38,7 +111,7 @@ updateTaskContainer();
 
 const config = {
   appId: 'abebe',
-  relayUrls: [`wss://${import.meta.env.DOMAIN}/ws/`] // <-- change_domain
+  relayUrls: [`wss://${import.meta.env.VITE_DOMAIN}/ws/`] // <-- change_domain
   // rtcConfig: {
   //   iceServers: [
   //     {  // need this if p2p fails
@@ -83,7 +156,7 @@ getM((data, peerId) => {
   switch(data.type) {
   case "b":
     data.body.forEach(task => {
-      const exist = otherTasks.some(obj => obj.header === task.header);
+      const exist = otherTasks.some(obj => obj.id === task.id);
       if(!exist) {
         const taskWPeer = {...task, peerId: data.peerId};
         otherTasks.push(taskWPeer);
@@ -103,25 +176,36 @@ getM((data, peerId) => {
   }
 })
 
+const addTaskToDB = (task) => {
+  const tx = db.transaction(["tasks"], "readwrite");
+  const store = tx.objectStore("tasks");
+
+  store.add(task);
+}
+
 const createTask = () => {
+  const id = crypto.randomUUID();
   const taskHeader = document.getElementById("task-header").value;
   const taskBody = document.getElementById("task-desc").value;
 
-  const exists = myTasks.some(obj => obj.header === taskHeader);
+  const exists = myTasks.some(obj => obj.id === id);
   if (exists) return;
 
   const taskObj = {
+    id: id,
     header: taskHeader,
     body: taskBody
   };
-  myTasks.push(taskObj);
-  localStorage.setItem("mt", JSON.stringify(myTasks));
-  sendMyTasks();
+  whenDBReady(() => {
+    addTaskToDB(taskObj);
+  })
+
+  broadcastTasks();
   updateTaskContainer();
 }
 
-const sendMyTasks = () => {
-  sendM({type: "b", mtype: "global", body: myTasks, peerId: selfId});
+const broadcastTasks = () => {
+  sendM({type: "b", mtype: "global", body: myTasks, peerId: selfId}); // gonna leave it like this for now
 }
 
 document.getElementById("task-button").addEventListener("click", createTask);

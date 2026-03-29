@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "app",
+      "dependencies": {
+        "@trystero-p2p/torrent": "^0.23.0",
+      },
       "devDependencies": {
         "vite": "^8.0.1",
       },
@@ -51,6 +54,10 @@
     "@rolldown/binding-win32-x64-msvc": ["@rolldown/binding-win32-x64-msvc@1.0.0-rc.12", "", { "os": "win32", "cpu": "x64" }, "sha512-PyqoipaswDLAZtot351MLhrlrh6lcZPo2LSYE+VDxbVk24LVKAGOuE4hb8xZQmrPAuEtTZW8E6D2zc5EUZX4Lw=="],
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-rc.12", "", {}, "sha512-HHMwmarRKvoFsJorqYlFeFRzXZqCt2ETQlEDOb9aqssrnVBB1/+xgTGtuTrIk5vzLNX1MjMtTf7W9z3tsSbrxw=="],
+
+    "@trystero-p2p/core": ["@trystero-p2p/core@0.23.0", "", {}, "sha512-ozhtgxKDZH11Gdef0wH8xivwAE/L0/lDFvEcNFWPJWnHZlxWPPyfeonwE287ssGevQNi10vnj6x2ZcOi0n1bQQ=="],
+
+    "@trystero-p2p/torrent": ["@trystero-p2p/torrent@0.23.0", "", { "dependencies": { "@trystero-p2p/core": "0.23.0" } }, "sha512-EVy3NBRfLz+c9NRcFax+XA3q7P7gOpsZbHpTBAAaNBZXXu2ltm3k3/6jaJfIoMidiMIIG+cIV1G+tUzrjUBwVg=="],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 

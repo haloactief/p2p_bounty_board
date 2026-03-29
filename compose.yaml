@@ -6,10 +6,11 @@ services:
       - 8000:8000
   
   nginx:
-    build: ./app
+    build: 
+      context: ./app
+      args:
+        - VITE_DOMAIN=DOMAIN
     restart: always
-    environment:
-      - DOMAIN=domain
     ports:
       - 80:80
       - 443:443
