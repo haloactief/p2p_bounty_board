@@ -160,10 +160,6 @@ const updateTaskContainer = () => {
     task.appendChild(taskHeader);
     task.appendChild(taskDesc);
 
-    const peer = document.createElement("p");
-    peer.textContent = obj.peerId ? `peer: ${obj.peerId}` : `peer: me`;
-    task.appendChild(peer);
-
     const taskId = document.createElement("p");
     taskId.textContent = `taskId: ${obj.id}`
     task.appendChild(taskId);
