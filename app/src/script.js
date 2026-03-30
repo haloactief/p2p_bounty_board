@@ -5,9 +5,18 @@ import { joinRoom, selfId } from '@trystero-p2p/torrent';
 // and broadcast them to all peers
 // im fucking genius
 
-const newPeerSpan = document.getElementById("new-peer");
 const tasksContainer = document.getElementById("tasks");
 const chat = document.getElementById("chat");
+let connectedPeers = new Set();
+const connectedPeersP = document.getElementById("peers");
+const hints = document.querySelectorAll(".hint");
+const peersHints = document.querySelectorAll(".peers-hint");
+
+hints.forEach(hint => {
+  hint.addEventListener("click", () => {
+    hint.style.display = "none";
+  });
+})
 
 var db;
 
@@ -122,11 +131,14 @@ const getTasksFromDB = () => {
     const cursor = event.target.result;
     if(cursor) {
       // console.log(cursor.key + " " + cursor.value.header + " " + cursor.value.body);
-      const task = {
-        id: cursor.key,
-        header: cursor.value.header,
-        body: cursor.value.body
-      }
+      // const task = {
+      //   id: cursor.key,
+      //   header: cursor.value.header,
+      //   body: cursor.value.body,
+      //   signature: cursor.signature,
+      //   signerPublicKey: cursor.signerPublicKey
+      // }
+      const task = cursor.value;
 
       const exists = myTasks.some(t => t.id === task.id);
       if (!exists) {
@@ -168,6 +180,26 @@ const updateTaskContainer = () => {
   })
 }
 
+const updateConnectedPeers = () => {
+  connectedPeersP.innerHTML = connectedPeers.size > 0 ? "" : "No peers";
+  if(connectedPeers.size > 0) {
+    peersHints.forEach(hint => {
+      hint.style.display = "none";
+    });
+  }
+
+  connectedPeers.forEach(peerId => {
+    const peer = document.createElement("p")
+    peer.innerText = peerToPublicKey.get(peerId).slice(0, 16);
+    peer.addEventListener("click", () => {
+      document.getElementById("recipient").value = peerToPublicKey.get(peerId);
+    })
+    peer.style.cursor = "pointer";
+
+    connectedPeersP.appendChild(peer);
+  })
+}
+
 updateTaskContainer();
 
 const config = {
@@ -185,18 +217,20 @@ const config = {
 };
 const room = joinRoom(config, 'yoyo');
 
-const [sendM, getM] = room.makeAction('chat')
+const [sendM, getM] = room.makeAction('chat');
 
 room.onPeerJoin(peerId => {
-  newPeerSpan.style.display = "block";
-  newPeerSpan.textContent = newPeerSpan.textContent + ` new peer: ${peerId}`;
-  setTimeout(() => {
-    newPeerSpan.style.display = "none";
-  }, 5000);
+  connectedPeers.add(peerId);
   sendM({type: "ri"}, peerId);
-  if (myTasks.length > 0) {
-    setTimeout(broadcastTasks, 500);
-  }
+  whenDBReady(() => {
+    if (myTasks.length > 0) broadcastTasks();
+  });
+  updateConnectedPeers();
+})
+
+room.onPeerLeave(peerId => {
+  connectedPeers.delete(peerId);
+  updateConnectedPeers();
 })
 
 const signMessage = async (data) => {
@@ -229,7 +263,8 @@ const verifySignature = async (data, signatureArr, publicKeyArr) => {
 }
 
 const sendMessage = () => {
-  const recipientId = document.getElementById("recipient").value;
+  const recipientId = publicKeyToPeer.get(document.getElementById("recipient").value);
+  console.log(publicKeyToPeer.get(document.getElementById("recipient").value));
   const message = document.getElementById("message").value;
   if(recipientId) {
     sendM({type: "m", mtype: "private", body: message}, recipientId);
@@ -239,7 +274,7 @@ const sendMessage = () => {
 
   const mdiv = document.createElement("div");
   mdiv.className = "message";
-  mdiv.textContent = recipientId ? `you to ${recipientId}: ${message} ${Date.now()}` : `you to all: ${message} ${Date.now()}`;
+  mdiv.textContent = recipientId ? `you to ${document.getElementById("recipient").value.slice(0, 16)}: ${message} ${Date.now()}` : `you to all: ${message} ${Date.now()}`;
   chat.appendChild(mdiv);
 }
 document.getElementById("send-button").addEventListener("click", sendMessage);
@@ -252,6 +287,7 @@ getM(async (data, peerId) => {
   case "mi":
     publicKeyToPeer.set(data.publicKey, peerId);
     peerToPublicKey.set(peerId, data.publicKey);
+    updateConnectedPeers();
     break;
   case "b":
     for(const task of data.payload || []) {

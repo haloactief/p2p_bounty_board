@@ -4,16 +4,27 @@
   box-sizing: border-box;
 }
 
-#selfId {
+#info {
   position: absolute;
   right: 0;
   top: 0;
+  text-align: right;
 }
 
-#new-peer {
-  position: absolute;
-  left: 0;
-  top: 0;
+#peers {
+  max-height: 50px;
+  overflow: auto;
+  position: relative;
+  --show-hint: 1;
+}
+
+.hint {
+  background: rgb(200, 255, 255, 0.8);
+  width: max-content;
+  height: fit-content;
+  white-space: pre-line;
+  text-align: left;
+  cursor: pointer;
 }
 
 .content {
