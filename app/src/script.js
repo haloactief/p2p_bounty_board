@@ -1,9 +1,7 @@
 import { joinRoom, selfId } from '@trystero-p2p/torrent';
 // import WebTorrent from 'https://esm.sh/webtorrent/dist/webtorrent.min.js';
 
-// store tasks in local storage
-// and broadcast them to all peers
-// im fucking genius
+// im afraid im too fucking stupid for this job
 
 const tasksContainer = document.getElementById("tasks");
 const chat = document.getElementById("chat");
@@ -225,7 +223,6 @@ room.onPeerJoin(peerId => {
   whenDBReady(() => {
     if (myTasks.length > 0) broadcastTasks();
   });
-  updateConnectedPeers();
 })
 
 room.onPeerLeave(peerId => {
@@ -264,17 +261,36 @@ const verifySignature = async (data, signatureArr, publicKeyArr) => {
 
 const sendMessage = () => {
   const recipientId = publicKeyToPeer.get(document.getElementById("recipient").value);
-  console.log(publicKeyToPeer.get(document.getElementById("recipient").value));
   const message = document.getElementById("message").value;
-  if(recipientId) {
+  const isPrivate = recipientId ? true : false;
+
+  if(isPrivate) {
     sendM({type: "m", mtype: "private", body: message}, recipientId);
   } else {
     sendM({type: "m", mtype: "global", body: message});
   }
 
   const mdiv = document.createElement("div");
-  mdiv.className = "message";
-  mdiv.textContent = recipientId ? `you to ${document.getElementById("recipient").value.slice(0, 16)}: ${message} ${Date.now()}` : `you to all: ${message} ${Date.now()}`;
+  mdiv.className = isPrivate ? "message private" : "message";
+
+  mdiv.append(
+    document.createTextNode(isPrivate ? "you to " : "you to all: "),
+
+    ...(isPrivate ? [
+      (() => {
+        const span = document.createElement("span");
+        span.textContent = document.getElementById("recipient").value.slice(0, 16);
+        span.className = "clickable";
+        span.addEventListener("click", () => {
+          document.getElementById("recipient").value = peerToPublicKey.get(recipientId);
+        })
+        return span;
+      })()
+    ] : []),
+
+    document.createTextNode(isPrivate ? `: ${message}` : ` ${message}`)
+  )
+
   chat.appendChild(mdiv);
 }
 document.getElementById("send-button").addEventListener("click", sendMessage);
@@ -323,11 +339,27 @@ getM(async (data, peerId) => {
     break;
   case "m":
     const senderPublicKey = peerToPublicKey.get(peerId) || peerId;
+    const isPrivate = data.mtype === "private";
 
-    const message = document.createElement("div");
-    message.className = "message";
-    message.textContent = data.mtype === "private" ? `${senderPublicKey.slice(0, 16)} to you: ${data.body} ${Date.now()}` : `${senderPublicKey.slice(0, 16)} to all: ${data.body} ${Date.now()}`;
-    chat.appendChild(message);
+    const mdiv = document.createElement("div");
+    mdiv.className = isPrivate ? "message private" : "message";
+
+    mdiv.append(
+      ...([
+        (() => {
+          const span = document.createElement("span");
+          span.textContent = senderPublicKey.slice(0, 16);
+          span.className = "clickable";
+          span.addEventListener("click", () => {
+            document.getElementById("recipient").value = senderPublicKey;
+          });
+          return span;
+        })()
+      ]),
+      document.createTextNode(isPrivate ? ` to you: ${data.body} ${Date.now()}` : ` to all: ${data.body} ${Date.now()}`)
+    );
+
+    chat.appendChild(mdiv);
     break;
   default:
     console.log("unknown message type");

@@ -76,3 +76,11 @@ body {
   display: grid;
   gap: .2em;
 }
+
+.clickable {
+  cursor: pointer;
+}
+
+.private {
+  background: rgb(255, 255, 200);
+}
