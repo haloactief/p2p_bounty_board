@@ -1,8 +1,6 @@
 import { joinRoom, selfId } from '@trystero-p2p/torrent';
 // import WebTorrent from 'https://esm.sh/webtorrent/dist/webtorrent.min.js';
 
-// im afraid im too fucking stupid for this job
-
 const tasksContainer = document.getElementById("tasks");
 const chat = document.getElementById("chat");
 let connectedPeers = new Set();
@@ -113,8 +111,8 @@ const whenDBReady = (callback) => {
   dbReady.then(() => callback());
 }
 
-var myTasks = [];
-var otherTasks = [];
+var myTasks = new Set();
+var otherTasks = new Set();
 
 const getTasksFromDB = () => {
   if(!db) {
@@ -130,9 +128,9 @@ const getTasksFromDB = () => {
     if(cursor) {
       const task = cursor.value;
 
-      const exists = myTasks.some(t => t.id === task.id);
+      const exists = Array.from(myTasks).some(t => t.id === task.id);
       if (!exists) {
-        myTasks.push(task);
+        myTasks.add(task);
       }
 
       cursor.continue();
@@ -146,25 +144,67 @@ whenDBReady(() => {
   getTasksFromDB();
 })
 
-const el = (tag, props = {}) => Object.assign(document.createElement(tag), props);
+const el = (tag, props = {}, children = []) => {
+  const element = Object.assign(document.createElement(tag), props);
+  if(!Array.isArray(children)) children = [children];
+  element.append(...children);
+  return element;
+}
+
+let currentPopup = null;
+
+const showTaskPopup = (taskData, taskElement) => {
+  if(currentPopup) currentPopup.remove();
+
+  const rect = taskElement.getBoundingClientRect();
+  
+  const popup = document.createElement("div");
+  popup.className = "task-popup";
+
+  popup.style.position = "absolute";
+  popup.style.top = `${rect.bottom + window.scrollY}px`;
+  popup.style.left = `${rect.left + window.scrollX}px`;
+
+  popup.append(
+    el("div", {
+      textContent: "action",
+      className: "clickable",
+      onclick: () => {
+        alert("clicked task action");
+      }
+    })
+  );
+
+  document.body.appendChild(popup);
+  currentPopup = popup;
+}
+
+document.addEventListener("click", () => currentPopup.remove());
 
 const createTaskElement = (obj) => {
   const task = document.createElement("div");
+  const timestamp = new Date(obj.createdAt).toLocaleString();
+
   task.className = "task";
+  task.onclick = (e) => {
+    e.stopPropagation();
+    showTaskPopup(obj, task);
+  }
   task.append(
     el("h3", {textContent: obj.header}),
     el("p", {textContent: `desc: ${obj.body}`}),
     el("p", {textContent: `id: ${obj.id}`}),
-    
-    el("p", {
-      textContent: `by: ${obj.createdBy}`,
-      className: "clickable",
-      onclick: () => {
-        document.getElementById("recipient").value = obj.createdBy;
-      }
-    }),
-
-    el("p", {textContent: `at: ${obj.createdAt}`})
+    el("div", {}, [
+      el("span", {textContent: "by: "}),
+      el("span", {
+        textContent: obj.createdBy,
+        className: "clickable",
+        onclick: () => {
+          document.getElementById("recipient").value = obj.createdBy;
+        }
+      })
+    ]),
+    el("p", {textContent: `at: ${timestamp}`})
   );
 
   return task;
@@ -328,9 +368,9 @@ getM(async (data, peerId) => {
       } else {
         console.warn("Task without signature: ", task.id);
       }
-      const exist = otherTasks.some(t => t.id === task.id);
+      const exist = Array.from(otherTasks).some(t => t.id === task.id);
       if(!exist) {
-        otherTasks.push({...task});
+        otherTasks.add({...task});
       }
     }
     updateTaskContainer();
@@ -391,7 +431,7 @@ const createTask = async () => {
     signerPublicKey: signed.publicKey
   }
 
-  myTasks.push(signedTask);
+  myTasks.add(signedTask);
   whenDBReady(() => {
     addTaskToDB(signedTask);
   })
