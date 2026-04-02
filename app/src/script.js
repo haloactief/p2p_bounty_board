@@ -148,20 +148,33 @@ whenDBReady(() => {
 
 const el = (tag, props = {}) => Object.assign(document.createElement(tag), props);
 
+const createTaskElement = (obj) => {
+  const task = document.createElement("div");
+  task.className = "task";
+  task.append(
+    el("h3", {textContent: obj.header}),
+    el("p", {textContent: `desc: ${obj.body}`}),
+    el("p", {textContent: `id: ${obj.id}`}),
+    
+    el("p", {
+      textContent: `by: ${obj.createdBy}`,
+      className: "clickable",
+      onclick: () => {
+        document.getElementById("recipient").value = obj.createdBy;
+      }
+    }),
+
+    el("p", {textContent: `at: ${obj.createdAt}`})
+  );
+
+  return task;
+}
+
 const updateTaskContainer = () => {
   const tasks = [...myTasks, ...otherTasks];
-  tasksContainer.innerHTML = "";
-  tasks.forEach(obj => {
-    const task = document.createElement("div");
-    task.className = "task";
-    task.append(
-      el("h3", {textContent: obj.header}),
-      el("p", {textContent: obj.body}),
-      el("p", {textContent: obj.id})
-    );
-
-    tasksContainer.appendChild(task);
-  })
+  tasksContainer.replaceChildren(
+    ...tasks.map(createTaskElement)
+  );
 }
 
 const updateConnectedPeers = () => {
@@ -261,21 +274,19 @@ const sendMessage = () => {
   mdiv.className = isPrivate ? "message private" : "message";
 
   mdiv.append(
-    document.createTextNode(isPrivate ? "you to " : "you to all: "),
+    el("span", {textContent: isPrivate ? "you to " : "you to all: "}),
 
     ...(isPrivate ? [
-      (() => {
-        const span = document.createElement("span");
-        span.textContent = document.getElementById("recipient").value.slice(0, 16);
-        span.className = "clickable";
-        span.addEventListener("click", () => {
+      el("span", {
+        textContent: document.getElementById("recipient").value.slice(0, 16),
+        className: "clickable",
+        onclick: () => {
           document.getElementById("recipient").value = peerToPublicKey.get(recipientId);
-        })
-        return span;
-      })()
+        }
+      })
     ] : []),
 
-    document.createTextNode(isPrivate ? `: ${message} ${time}` : ` ${message} ${time}`)
+    el("span", {textContent: isPrivate ? `: ${message} ${time}` : ` ${message} ${time}`})
   )
 
   chat.appendChild(mdiv);
@@ -333,18 +344,15 @@ getM(async (data, peerId) => {
     mdiv.className = isPrivate ? "message private" : "message";
 
     mdiv.append(
-      ...([
-        (() => {
-          const span = document.createElement("span");
-          span.textContent = senderPublicKey.slice(0, 16);
-          span.className = "clickable";
-          span.addEventListener("click", () => {
-            document.getElementById("recipient").value = senderPublicKey;
-          });
-          return span;
-        })()
-      ]),
-      document.createTextNode(isPrivate ? ` to you: ${data.body} ${time}` : ` to all: ${data.body} ${time}`)
+      el("span", {
+        textContent: senderPublicKey.slice(0, 16),
+        className: "clickable",
+        onclick: () => {
+          document.getElementById("recipient").value = senderPublicKey;
+        }
+      }),
+
+      el("span", {textContent: isPrivate ? ` to you: ${data.body} ${time}` : ` to all: ${data.body} ${time}`})
     );
 
     chat.appendChild(mdiv);
