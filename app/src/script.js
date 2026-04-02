@@ -128,14 +128,6 @@ const getTasksFromDB = () => {
   objectStore.openCursor().onsuccess = (event) => {
     const cursor = event.target.result;
     if(cursor) {
-      // console.log(cursor.key + " " + cursor.value.header + " " + cursor.value.body);
-      // const task = {
-      //   id: cursor.key,
-      //   header: cursor.value.header,
-      //   body: cursor.value.body,
-      //   signature: cursor.signature,
-      //   signerPublicKey: cursor.signerPublicKey
-      // }
       const task = cursor.value;
 
       const exists = myTasks.some(t => t.id === task.id);
@@ -145,7 +137,6 @@ const getTasksFromDB = () => {
 
       cursor.continue();
     } else {
-      // console.log("No more entries!");
       updateTaskContainer();
     }
   }
@@ -155,24 +146,19 @@ whenDBReady(() => {
   getTasksFromDB();
 })
 
+const el = (tag, props = {}) => Object.assign(document.createElement(tag), props);
+
 const updateTaskContainer = () => {
   const tasks = [...myTasks, ...otherTasks];
   tasksContainer.innerHTML = "";
   tasks.forEach(obj => {
     const task = document.createElement("div");
-    task.className = "task"
-    const taskHeader = document.createElement("h3");
-    taskHeader.textContent = obj.header;
-
-    const taskDesc = document.createElement("p");
-    taskDesc.textContent = obj.body;
-
-    task.appendChild(taskHeader);
-    task.appendChild(taskDesc);
-
-    const taskId = document.createElement("p");
-    taskId.textContent = `taskId: ${obj.id}`
-    task.appendChild(taskId);
+    task.className = "task";
+    task.append(
+      el("h3", {textContent: obj.header}),
+      el("p", {textContent: obj.body}),
+      el("p", {textContent: obj.id})
+    );
 
     tasksContainer.appendChild(task);
   })
@@ -202,16 +188,16 @@ updateTaskContainer();
 
 const config = {
   appId: 'abebe',
-  relayUrls: [`wss://${import.meta.env.VITE_DOMAIN}/ws/`] // <-- change_domain
-  // rtcConfig: {
-  //   iceServers: [
-  //     {  // need this if p2p fails
-  //       urls: `turn:${import.meta.env.DOMAIN}:3478`, //  <-- change_domain
-  //       username: "stupidboy",
-  //       credential: "hardpassword"
-  //     }
-  //   ]
-  // }
+  relayUrls: [`wss://${import.meta.env.VITE_DOMAIN}/ws/`],
+  rtcConfig: {
+    iceServers: [
+      {  // need this if p2p fails
+        urls: `turn:${import.meta.env.DOMAIN}:3478`,
+        username: "stupidboy",
+        credential: "hardpassword"
+      }
+    ]
+  }
 };
 const room = joinRoom(config, 'yoyo');
 
@@ -263,6 +249,7 @@ const sendMessage = () => {
   const recipientId = publicKeyToPeer.get(document.getElementById("recipient").value);
   const message = document.getElementById("message").value;
   const isPrivate = recipientId ? true : false;
+  const time = new Date().toLocaleTimeString();
 
   if(isPrivate) {
     sendM({type: "m", mtype: "private", body: message}, recipientId);
@@ -288,7 +275,7 @@ const sendMessage = () => {
       })()
     ] : []),
 
-    document.createTextNode(isPrivate ? `: ${message}` : ` ${message}`)
+    document.createTextNode(isPrivate ? `: ${message} ${time}` : ` ${message} ${time}`)
   )
 
   chat.appendChild(mdiv);
@@ -340,6 +327,7 @@ getM(async (data, peerId) => {
   case "m":
     const senderPublicKey = peerToPublicKey.get(peerId) || peerId;
     const isPrivate = data.mtype === "private";
+    const time = new Date().toLocaleTimeString();
 
     const mdiv = document.createElement("div");
     mdiv.className = isPrivate ? "message private" : "message";
@@ -356,7 +344,7 @@ getM(async (data, peerId) => {
           return span;
         })()
       ]),
-      document.createTextNode(isPrivate ? ` to you: ${data.body} ${Date.now()}` : ` to all: ${data.body} ${Date.now()}`)
+      document.createTextNode(isPrivate ? ` to you: ${data.body} ${time}` : ` to all: ${data.body} ${time}`)
     );
 
     chat.appendChild(mdiv);
