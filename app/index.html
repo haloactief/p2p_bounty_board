@@ -4,45 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="src/style.css">
-  <title>Document</title>
+  <title>P2P Bounty Board</title>
 </head>
 <body>
   <div class="content">
-    <div id="info">
-      <h2 id="selfId"></h2>
+    <div class="lside">
+      <div>
+        <div id="selfId"></div>
+      </div>
+      <div class="send-forms">
+        <div class="controls">
+          <div>Send message</div>
+          <input type="text" name="recipient" id="recipient" placeholder="recipient">
+          <input type="text" name="message" id="message" placeholder="message">
+          <button id="send-button">send</button>
+        </div>
+  
+        <div class="controls">
+          <div>Create task</div>
+          <input type="text" name="task-header" id="task-header" placeholder="header">
+          <input type="text" name="task-desc" id="task-desc" placeholder="description">
+          <button id="task-button">create</button>
+        </div>
+      </div>
+      <div class="actions-wrap">
+        <div id="actions">Click on task</div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="tasks-wrap">
+        <h1>Tasks</h1>
+        <div id="tasks"></div>
+      </div>
+      <div class="chat-wrap">
+        <h1>Chat</h1>
+        <div id="chat"></div>
+      </div>
+    </div>
+    <div class="rside">
+      <div>Peers</div>
       <div id="peers">
-        <p>Connecting to other peers (if there are any) (this might take a while)</p>
-        <div class="hint peers-hint">You can click on peers that will appear here to send them messages! (click on hint to dismiss it)</div>
+        <div>Connecting to other peers<br>(if there are any)<br>(this might take a while)</div>
+        <div class="hint peers-hint">You can click on peers that will appear here to send them messages!<br>(click on hint to dismiss it)</div>
       </div>
     </div>
 
-    <div class="send-forms">
-      <div class="controls">
-        <input type="text" name="recipient" id="recipient" placeholder="recipient">
-        <input type="text" name="message" id="message" placeholder="message">
-        <button id="send-button">send</button>
-      </div>
-
-      <div class="controls">
-        <input type="text" name="task-header" id="task-header" placeholder="header">
-        <input type="text" name="task-desc" id="task-desc" placeholder="description">
-        <button id="task-button">create</button>
-      </div>
-    </div>
-
-    <div class="tasksNchat">
-      <div>
-        <h2>Tasks</h2>
-        <div id="tasks">
-        </div>
-      </div>
-      <div>
-        <h2>Chat</h2>
-        <div id="chat">
-        </div>
-      </div>
-    </div>
-  </div>
 
   <script type="module" src="src/script.js"></script>
 </body>

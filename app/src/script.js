@@ -151,35 +151,37 @@ const el = (tag, props = {}, children = []) => {
   return element;
 }
 
-let currentPopup = null;
+let currentActions = null;
 
-const showTaskPopup = (taskData, taskElement) => {
-  if(currentPopup) currentPopup.remove();
+const openActions = (taskData) => {
+  if(currentActions) currentActions.remove();
+  const actionsDiv = document.getElementById("actions")
 
-  const rect = taskElement.getBoundingClientRect();
-  
-  const popup = document.createElement("div");
-  popup.className = "task-popup";
-
-  popup.style.position = "absolute";
-  popup.style.top = `${rect.bottom + window.scrollY}px`;
-  popup.style.left = `${rect.left + window.scrollX}px`;
-
-  popup.append(
+  const actions = el("div");
+  actions.append(
+    el("div", {
+      textContent: `Task: ${taskData.id.slice(-12)}`
+    }),
     el("div", {
       textContent: "action",
-      className: "clickable",
       onclick: () => {
-        alert("clicked task action");
-      }
+        console.log("clicked task action")
+      },
+      className: "action clickable"
+    }),
+    el("div", {
+      textContent: "action2",
+      onclick: () => {
+        console.log("clicked task action2")
+      },
+      className: "action clickable"
     })
   );
 
-  document.body.appendChild(popup);
-  currentPopup = popup;
-}
+  actionsDiv.replaceChildren(actions);
 
-document.addEventListener("click", () => currentPopup.remove());
+  currentActions = actions;
+}
 
 const createTaskElement = (obj) => {
   const task = document.createElement("div");
@@ -188,12 +190,12 @@ const createTaskElement = (obj) => {
   task.className = "task";
   task.onclick = (e) => {
     e.stopPropagation();
-    showTaskPopup(obj, task);
+    openActions(obj);
   }
   task.append(
     el("h3", {textContent: obj.header}),
-    el("p", {textContent: `desc: ${obj.body}`}),
-    el("p", {textContent: `id: ${obj.id}`}),
+    el("div", {textContent: `desc: ${obj.body}`}),
+    el("div", {textContent: `id: ${obj.id}`}),
     el("div", {}, [
       el("span", {textContent: "by: "}),
       el("span", {
@@ -226,14 +228,13 @@ const updateConnectedPeers = () => {
   }
 
   connectedPeers.forEach(peerId => {
-    const peer = document.createElement("p")
-    peer.innerText = peerToPublicKey.get(peerId).slice(0, 16);
-    peer.addEventListener("click", () => {
-      document.getElementById("recipient").value = peerToPublicKey.get(peerId);
-    })
-    peer.style.cursor = "pointer";
-
-    connectedPeersP.appendChild(peer);
+    connectedPeersP.appendChild(el("div", {
+      textContent: peerToPublicKey.get(peerId).slice(0, 16),
+      onclick: () => {
+        document.getElementById("recipient").value = peerToPublicKey.get(peerId);
+      },
+      className: "clickable peer"
+    }));
   })
 }
 
@@ -260,7 +261,7 @@ room.onPeerJoin(peerId => {
   connectedPeers.add(peerId);
   sendM({type: "ri"}, peerId);
   whenDBReady(() => {
-    if (myTasks.length > 0) broadcastTasks();
+    if (myTasks.size > 0) broadcastTasks();
   });
 })
 
@@ -345,8 +346,8 @@ getM(async (data, peerId) => {
     break;
   case "b":
     for(const task of data.payload || []) {
-      if (myTasks.some(t => t.id === task.id) || 
-          otherTasks.some(t => t.id === task.id)) {
+      if (Array.from(myTasks).some(t => t.id === task.id) || 
+          Array.from(otherTasks).some(t => t.id === task.id)) {
         continue;
       }
 
@@ -444,8 +445,8 @@ const createTask = async () => {
 }
 
 const broadcastTasks = async () => {
-  if(myTasks.length === 0) return;
-  sendM({type: "b", mtype: "global", payload: myTasks});
+  if(myTasks.size === 0) return;
+  sendM({type: "b", mtype: "global", payload: Array.from(myTasks)});
 }
 
 document.getElementById("task-button").addEventListener("click", createTask);

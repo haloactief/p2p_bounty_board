@@ -4,62 +4,43 @@
   box-sizing: border-box;
 }
 
-#info {
-  position: absolute;
-  right: 0;
-  top: 0;
-  text-align: right;
-}
-
-#peers {
-  max-height: 50px;
-  overflow: auto;
-  position: relative;
-  --show-hint: 1;
-}
-
-.hint {
-  background: rgb(200, 255, 255, 0.8);
-  width: max-content;
-  height: fit-content;
-  white-space: pre-line;
-  text-align: left;
-  cursor: pointer;
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 .content {
   display: grid;
-  gap: 1em;
   position: relative;
-
-  grid-template-rows: auto minmax(0, 1fr);
-
-  padding: 2em;
   height: 100dvh;
+  width: 100dvw;
+  overflow: hidden;
+
+  grid-template-columns: 250px 1fr 250px;
 }
 
-body {
-  min-height: 100dvh;
-  min-width: 100dvw;
+.lside, .rside, #actions {
+  display: flex;
+  flex-direction: column;
+  padding: .4em;
+  gap: .4em;
 }
 
-.tasksNchat {
+.lside {
+  background: rgb(200, 255, 255);
+}
+
+.rside {
+  background: rgb(255, 255, 200);
+  text-align: right;
+}
+
+.main {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 0;
-  gap: 2em;
-}
-
-.tasksNchat > div {
-  background: rgb(200, 200, 255);
-  min-height: 0;
-  overflow-y: auto;
-}
-
-#tasks, #chat {
-  display: grid;
-  grid-template-rows: 1fr;
-  gap: .5em;
+  grid-template-rows: 1fr 1fr;
+  height: 100%;
+  overflow: hidden;
 }
 
 .task, .message {
@@ -67,14 +48,59 @@ body {
   background: rgb(255, 200, 255);
 }
 
-.send-forms {
-  display: flex;
-  gap: .5em;
-}
-
-.controls {
+.send-forms, .controls {
   display: grid;
   gap: .2em;
+}
+
+.main h1 {
+  text-align: center;
+}
+
+.tasks-wrap {
+  background: rgb(200, 200, 255);
+  overflow-y: auto;
+}
+
+#tasks, #chat {
+  display: grid;
+  gap: .4em;
+}
+
+.actions-wrap {
+  background: rgb(150, 200, 200);
+}
+
+.action {
+  background: rgb(200, 150, 200);
+  text-align: center;
+}
+
+.action:hover {
+  background: rgb(200, 200, 150);
+  transition: background 200ms ease-in-out;
+}
+
+.peer {
+  background: rgb(150, 150, 200);
+}
+
+.peer:hover {
+  background: rgb(150, 200, 150);
+  transition: background 200ms ease-in-out;
+}
+
+.chat-wrap {
+  background: rgb(200, 255, 200);
+  overflow-y: auto;
+}
+
+
+.hint {
+  background: rgb(200, 200, 200, 0.8);
+  height: fit-content;
+  white-space: pre-line;
+  cursor: pointer;
 }
 
 .clickable {
@@ -82,5 +108,5 @@ body {
 }
 
 .private {
-  background: rgb(255, 255, 200);
+  background: rgb(255, 200, 200);
 }
