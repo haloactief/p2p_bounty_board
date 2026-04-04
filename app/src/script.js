@@ -18,7 +18,7 @@ var db;
 
 const openDB = () => {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("p2pdb", 3);
+    const request = indexedDB.open("p2pdb", 4);
     request.onerror = () => {
       console.log("fuck u");
     }
@@ -37,11 +37,12 @@ const openDB = () => {
       tasksStore.createIndex("header", "header", { unique: false });
       tasksStore.createIndex("body", "body", { unique: false });
       tasksStore.createIndex("createdBy", "createdBy", { unique: false });
-      tasksStore.createIndex("createdAt", "cretedAt", { unique: false });
+      tasksStore.createIndex("createdAt", "createdAt", { unique: false });
       tasksStore.createIndex("signature", "signature", { unique: true });
       tasksStore.createIndex("signerPublicKey", "signerPublicKey", { unique: false});
 
       db.createObjectStore("identity", {keyPath: "id"});
+      db.createObjectStore("usdtAddress", {keyPath: "id"})
     }
   })
 }
@@ -110,6 +111,23 @@ dbReady.then(() => {
 const whenDBReady = (callback) => {
   dbReady.then(() => callback());
 }
+
+let paymentAddress = null;
+
+const saveAddress = async () => {
+  const address = document.getElementById("recipient-address").value.trim();
+  whenDBReady(() => {
+    const tx = db.transaction("usdtAddress", "readwrite");
+    tx.objectStore("usdtAddress").put({
+      id: "myUsdtAddress",
+      address: address
+    });
+  })
+  paymentAddress = address;
+}
+document.getElementById("save-address-button").addEventListener("click", () => {
+  saveAddress();
+})
 
 var myTasks = new Set();
 var otherTasks = new Set();
