@@ -151,17 +151,44 @@ const el = (tag, props = {}, children = []) => {
   return element;
 }
 
+const deleteByProperty = (set, key, value) => {
+  for(const item of set) {
+    if(item[key] === value);
+    set.delete(item);
+    return true;
+  }
+  return false;
+}
+
 let currentActions = null;
 
 const openActions = (taskData) => {
   if(currentActions) currentActions.remove();
   const actionsDiv = document.getElementById("actions")
+  const isOwner = taskData.createdBy === myPublicKeyBase64;
 
   const actions = el("div");
   actions.append(
     el("div", {
       textContent: `Task: ${taskData.id.slice(-12)}`
     }),
+    ...(isOwner ? [
+      el("div", {
+        textContent: "Delete",
+        onclick: () => {
+          deleteByProperty(myTasks, "id")
+          updateTaskContainer();
+          whenDBReady(() => {
+            const tx = db.transaction(["tasks"], "readwrite");
+            const store = tx.objectStore("tasks");
+
+            store.delete(taskData.id);
+          })
+          sendM({type: "rb", mtype: "global", payload: taskData.id});
+        },
+        className: "action clickable"
+      })
+    ] : []),
     el("div", {
       textContent: "action",
       onclick: () => {
@@ -374,6 +401,10 @@ getM(async (data, peerId) => {
         otherTasks.add({...task});
       }
     }
+    updateTaskContainer();
+    break;
+  case "rb":
+    deleteByProperty(otherTasks, "id", data.payload);
     updateTaskContainer();
     break;
   case "m":
