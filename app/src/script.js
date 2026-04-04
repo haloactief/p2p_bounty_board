@@ -42,7 +42,7 @@ const openDB = () => {
       tasksStore.createIndex("signerPublicKey", "signerPublicKey", { unique: false});
 
       db.createObjectStore("identity", {keyPath: "id"});
-      db.createObjectStore("usdtAddress", {keyPath: "id"})
+      db.createObjectStore("usdtAddress", {keyPath: "id"});
     }
   })
 }
@@ -54,6 +54,7 @@ const IDENTITY_KEY = "myEd25519Identity";
 
 const publicKeyToPeer = new Map();
 const peerToPublicKey = new Map();
+const publicKeyToAddress = new Map();
 
 const getOrCreateKeyPair = async () => {
   if(myKeyPair) return;
@@ -114,6 +115,25 @@ const whenDBReady = (callback) => {
 
 let paymentAddress = null;
 
+whenDBReady(async () => {
+  const tx = db.transaction("usdtAddress", "readonly");
+  const store = tx.objectStore("usdtAddress");
+
+  const stored = await new Promise((resolve, reject) => {
+    const req = store.get("myUsdtAddress");
+    req.onsuccess = (event) => {
+      resolve(event.target.result);
+    };
+    req.onerror = (event) => {
+      resolve(null);
+    };
+  })
+
+  if(stored && stored.address) {
+    paymentAddress = stored.address;
+  }
+})
+
 const saveAddress = async () => {
   const address = document.getElementById("recipient-address").value.trim();
   whenDBReady(() => {
@@ -127,6 +147,7 @@ const saveAddress = async () => {
 }
 document.getElementById("save-address-button").addEventListener("click", () => {
   saveAddress();
+  sendM({type: "mi", mtype: "myUsdtAddress", address: paymentAddress});
 })
 
 var myTasks = new Set();
@@ -178,11 +199,12 @@ const deleteByProperty = (set, key, value) => {
   return false;
 }
 
-let currentActions = null;
+let currentTaskActions = null;
+let currentPeerActions = null;
 
-const openActions = (taskData) => {
-  if(currentActions) currentActions.remove();
-  const actionsDiv = document.getElementById("actions")
+const openTaskActions = (taskData) => {
+  if(currentTaskActions) currentTaskActions.remove();
+  const actionsDiv = document.getElementById("task-actions")
   const isOwner = taskData.createdBy === myPublicKeyBase64;
 
   const actions = el("div");
@@ -225,7 +247,34 @@ const openActions = (taskData) => {
 
   actionsDiv.replaceChildren(actions);
 
-  currentActions = actions;
+  currentTaskActions = actions;
+}
+
+const openPeerActions = (peerPublicKey) => {
+  if(currentPeerActions) currentPeerActions.remove();
+  const actionsDiv = document.getElementById("peer-actions");
+
+  const actions = el("div");
+  actions.append(
+    el("div", {
+      textContent: "Send message",
+      className: "clickable action",
+      onclick: () => {
+        document.getElementById("recipient").value = peerPublicKey;
+      }
+    }),
+    el("div", {
+      textContent: "Copy payment address",
+      className: "clickable action",
+      onclick: () => {
+        navigator.clipboard.writeText(publicKeyToAddress.get(peerPublicKey));
+      }
+    })
+  )
+
+  actionsDiv.replaceChildren(actions);
+
+  currentPeerActions = actions;
 }
 
 const createTaskElement = (obj) => {
@@ -235,7 +284,7 @@ const createTaskElement = (obj) => {
   task.className = "task";
   task.onclick = (e) => {
     e.stopPropagation();
-    openActions(obj);
+    openTaskActions(obj);
   }
   task.append(
     el("h3", {textContent: obj.header}),
@@ -247,7 +296,7 @@ const createTaskElement = (obj) => {
         textContent: obj.createdBy,
         className: "clickable",
         onclick: () => {
-          document.getElementById("recipient").value = obj.createdBy;
+          openPeerActions(obj.createdBy);
         }
       })
     ]),
@@ -276,7 +325,7 @@ const updateConnectedPeers = () => {
     connectedPeersP.appendChild(el("div", {
       textContent: peerToPublicKey.get(peerId).slice(0, 16),
       onclick: () => {
-        document.getElementById("recipient").value = peerToPublicKey.get(peerId);
+        openPeerActions(peerToPublicKey.get(peerId));
       },
       className: "clickable peer"
     }));
@@ -367,7 +416,7 @@ const sendMessage = () => {
         textContent: document.getElementById("recipient").value.slice(0, 16),
         className: "clickable",
         onclick: () => {
-          document.getElementById("recipient").value = peerToPublicKey.get(recipientId);
+          openPeerActions(peerToPublicKey.get(recipientId));
         }
       })
     ] : []),
@@ -382,11 +431,22 @@ document.getElementById("send-button").addEventListener("click", sendMessage);
 getM(async (data, peerId) => {
   switch(data.type) {
   case "ri":
-    sendM({type: "mi", publicKey: myPublicKeyBase64}, peerId);
+    sendM({type: "mi", mtype: "myEd25519Identity", publicKey: myPublicKeyBase64}, peerId);
+    sendM({type: "mi", mtype: "myUsdtAddress", address: paymentAddress}, peerId);
     break;
   case "mi":
-    publicKeyToPeer.set(data.publicKey, peerId);
-    peerToPublicKey.set(peerId, data.publicKey);
+    switch(data.mtype) {
+    case "myEd25519Identity":
+      publicKeyToPeer.set(data.publicKey, peerId);
+      peerToPublicKey.set(peerId, data.publicKey);
+      break;
+    case "myUsdtAddress":
+      const senderPublicKey = peerToPublicKey.get(peerId);
+      publicKeyToAddress.set(senderPublicKey, data.address);
+      break;
+    default:
+      console.warn("negodnik")
+    }
     updateConnectedPeers();
     break;
   case "b":
@@ -438,7 +498,7 @@ getM(async (data, peerId) => {
         textContent: senderPublicKey.slice(0, 16),
         className: "clickable",
         onclick: () => {
-          document.getElementById("recipient").value = senderPublicKey;
+          openPeerActions(senderPublicKey);
         }
       }),
 
