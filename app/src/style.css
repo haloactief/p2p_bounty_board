@@ -18,13 +18,24 @@ html, body {
   overflow: hidden;
 
   grid-template-columns: 250px 1fr 250px;
+
+  padding: .5em;
+  gap: .5em;
 }
 
-.lside, .rside, .actions-wrap {
+.content > div {
+  border-radius: .5em;
+}
+
+.lside, .rside, .controls, .action-buttons {
   display: flex;
   flex-direction: column;
-  padding: .4em;
-  gap: .4em;
+  padding: .5em;
+  gap: .5em;
+}
+
+.controls {
+  gap: .2em;
 }
 
 .lside {
@@ -48,6 +59,12 @@ html, body {
   grid-template-rows: 1fr 1fr;
   height: 100%;
   overflow: hidden;
+
+  gap: .5em;
+}
+
+.main > div {
+  border-radius: .5em;
 }
 
 .task, .message {
@@ -55,9 +72,9 @@ html, body {
   background: rgb(255, 200, 255);
 }
 
-.send-forms, .controls {
+.send-forms {
   display: grid;
-  gap: .2em;
+  gap: .5em;
 }
 
 .main h1 {
@@ -69,18 +86,22 @@ html, body {
   overflow-y: auto;
 }
 
-#tasks, #chat {
+#tasks, #chat, #peers {
   display: grid;
-  gap: .4em;
+  gap: .5em;
 }
 
-.actions-wrap {
+.controls {
   background: rgb(150, 200, 200);
+  border-radius: .5em;
 }
 
 .action {
   background: rgb(200, 150, 200);
   text-align: center;
+
+  border-radius: .5em;
+  padding: .2em 0;
 }
 
 .action:hover {
@@ -88,8 +109,17 @@ html, body {
   transition: background 200ms ease-in-out;
 }
 
+.action-buttons {
+  margin-top: .5em;
+  gap: .2em;
+  padding: 0;
+}
+
 .peer {
   background: rgb(150, 150, 200);
+
+  padding: .5em;
+  border-radius: .5em;
 }
 
 .peer:hover {
@@ -108,6 +138,9 @@ html, body {
   height: fit-content;
   white-space: pre-line;
   cursor: pointer;
+
+  border-radius: .5em;
+  padding: .5em;
 }
 
 .clickable {

@@ -207,11 +207,10 @@ const openTaskActions = (taskData) => {
   const actionsDiv = document.getElementById("task-actions")
   const isOwner = taskData.createdBy === myPublicKeyBase64;
 
-  const actions = el("div");
-  actions.append(
-    el("div", {
-      textContent: `Task: ${taskData.id.slice(-12)}`
-    }),
+  const actionButtons = el("div", {
+    className: "action-buttons"
+  })
+  actionButtons.append(
     ...(isOwner ? [
       el("div", {
         textContent: "Delete",
@@ -243,6 +242,14 @@ const openTaskActions = (taskData) => {
       },
       className: "action clickable"
     })
+  )
+
+  const actions = el("div");
+  actions.append(
+    el("div", {
+      textContent: `Task: ${taskData.id.slice(-12)}`
+    }),
+    actionButtons
   );
 
   actionsDiv.replaceChildren(actions);
@@ -254,8 +261,10 @@ const openPeerActions = (peerPublicKey) => {
   if(currentPeerActions) currentPeerActions.remove();
   const actionsDiv = document.getElementById("peer-actions");
 
-  const actions = el("div");
-  actions.append(
+  const actionButtons = el("div", {
+    className: "action-buttons"
+  })
+  actionButtons.append(
     el("div", {
       textContent: "Send message",
       className: "clickable action",
@@ -270,6 +279,14 @@ const openPeerActions = (peerPublicKey) => {
         navigator.clipboard.writeText(publicKeyToAddress.get(peerPublicKey));
       }
     })
+  )
+
+  const actions = el("div");
+  actions.append(
+    el("div", {
+      textContent: `Task: ${peerPublicKey.slice(0, 16)}`
+    }),
+    actionButtons
   )
 
   actionsDiv.replaceChildren(actions);
