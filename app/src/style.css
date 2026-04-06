@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+:root {
+  --border: 1px solid #000000;
+}
+
 html, body {
   height: 100%;
   width: 100%;
@@ -21,6 +25,8 @@ html, body {
 
   padding: .5em;
   gap: .5em;
+
+  background: #CDDAFD;
 }
 
 .content > div {
@@ -34,12 +40,12 @@ html, body {
   gap: .5em;
 }
 
-.controls {
-  gap: .2em;
+.lside, .rside, .chat-wrap, .tasks-wrap {
+  background: #DFE7FD;
+  overflow-y: auto;
 }
 
 .lside {
-  background: rgb(200, 255, 255);
   justify-content: space-between;
 }
 
@@ -50,7 +56,6 @@ html, body {
 }
 
 .rside {
-  background: rgb(255, 255, 200);
   text-align: right;
 }
 
@@ -69,7 +74,9 @@ html, body {
 
 .task, .message {
   padding: .5em;
-  background: rgb(255, 200, 255);
+  background: #EAE4E9;
+  border-radius: .5em;
+  border: var(--border);
 }
 
 .send-forms {
@@ -81,8 +88,9 @@ html, body {
   text-align: center;
 }
 
+.chat-wrap,
 .tasks-wrap {
-  background: rgb(200, 200, 255);
+  padding: .5em;
   overflow-y: auto;
 }
 
@@ -92,20 +100,44 @@ html, body {
 }
 
 .controls {
-  background: rgb(150, 200, 200);
+  background: #EAE4E9;
+  border: var(--border);
   border-radius: .5em;
+  gap: .2em;
 }
 
-.action {
-  background: rgb(200, 150, 200);
-  text-align: center;
-
+.controls > button {
+  background: #EAE4E9;
+  border: var(--border);
   border-radius: .5em;
   padding: .2em 0;
 }
 
+.controls > button:hover {
+  background: #DFE7FD;
+  transition: background 200ms ease-in-out;
+}
+
+.controls > input {
+  border-radius: .5em;
+  border: var(--border);
+  padding: .2em .5em;
+  
+  color: black;
+}
+
+.action {
+  text-align: center;
+  font-size: small;
+  border-radius: .5em;
+  padding: .2em 0;
+  
+  background: #EAE4E9;
+  border: 1px solid;
+}
+
 .action:hover {
-  background: rgb(200, 200, 150);
+  background: #DFE7FD;
   transition: background 200ms ease-in-out;
 }
 
@@ -116,25 +148,22 @@ html, body {
 }
 
 .peer {
-  background: rgb(150, 150, 200);
+  background: #EAE4E9;
+  border: var(--border);
 
   padding: .5em;
   border-radius: .5em;
 }
 
 .peer:hover {
-  background: rgb(150, 200, 150);
+  background: #DFE7FD;
   transition: background 200ms ease-in-out;
 }
 
-.chat-wrap {
-  background: rgb(200, 255, 200);
-  overflow-y: auto;
-}
-
-
 .hint {
-  background: rgb(200, 200, 200, 0.8);
+  background: #EAE4E9;
+  border: var(--border);
+
   height: fit-content;
   white-space: pre-line;
   cursor: pointer;
@@ -148,5 +177,5 @@ html, body {
 }
 
 .private {
-  background: rgb(255, 200, 200);
+  background: #FAD2E1;
 }

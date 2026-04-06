@@ -456,6 +456,7 @@ getM(async (data, peerId) => {
     case "myEd25519Identity":
       publicKeyToPeer.set(data.publicKey, peerId);
       peerToPublicKey.set(peerId, data.publicKey);
+      updateConnectedPeers();
       break;
     case "myUsdtAddress":
       const senderPublicKey = peerToPublicKey.get(peerId);
@@ -464,7 +465,6 @@ getM(async (data, peerId) => {
     default:
       console.warn("negodnik")
     }
-    updateConnectedPeers();
     break;
   case "b":
     for(const task of data.payload || []) {
