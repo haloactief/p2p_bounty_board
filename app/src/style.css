@@ -5,13 +5,17 @@
 }
 
 :root {
-  --border: 1px solid #000000;
+  --border: 1px solid #30343F;
+  --accent: rgb(39, 52, 105, 0.3);
+  --main: rgb(30, 39, 73, 0.2);
 }
 
 html, body {
   height: 100%;
   width: 100%;
   overflow: hidden;
+
+  color: #FAFAFF;
 }
 
 .content {
@@ -26,11 +30,28 @@ html, body {
   padding: .5em;
   gap: .5em;
 
-  background: #CDDAFD;
+  background: url("background.gif");
+  background-size: 100% 100%;
 }
 
 .content > div {
   border-radius: .5em;
+}
+
+.main {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  height: 100%;
+  overflow: hidden;
+  gap: .5em;
+}
+
+.main > div {
+  border-radius: .5em;
+}
+
+.main h1 {
+  text-align: center;
 }
 
 .lside, .rside, .controls, .action-buttons {
@@ -41,7 +62,8 @@ html, body {
 }
 
 .lside, .rside, .chat-wrap, .tasks-wrap {
-  background: #DFE7FD;
+  background: var(--main);
+  /* backdrop-filter: blur(10px); */
   overflow-y: auto;
 }
 
@@ -59,22 +81,9 @@ html, body {
   text-align: right;
 }
 
-.main {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  height: 100%;
-  overflow: hidden;
-
-  gap: .5em;
-}
-
-.main > div {
-  border-radius: .5em;
-}
-
 .task, .message {
   padding: .5em;
-  background: #EAE4E9;
+  background: var(--accent);
   border-radius: .5em;
   border: var(--border);
 }
@@ -82,10 +91,6 @@ html, body {
 .send-forms {
   display: grid;
   gap: .5em;
-}
-
-.main h1 {
-  text-align: center;
 }
 
 .chat-wrap,
@@ -100,17 +105,19 @@ html, body {
 }
 
 .controls {
-  background: #EAE4E9;
-  border: var(--border);
   border-radius: .5em;
   gap: .2em;
 }
 
 .controls > button {
-  background: #EAE4E9;
-  border: var(--border);
   border-radius: .5em;
   padding: .2em 0;
+  color: #FAFAFF;
+}
+
+.controls, .controls > button {
+  background: var(--accent);
+  border: var(--border);
 }
 
 .controls > button:hover {
@@ -132,8 +139,8 @@ html, body {
   border-radius: .5em;
   padding: .2em 0;
   
-  background: #EAE4E9;
-  border: 1px solid;
+  background: var(--accent);
+  border: var(--border);
 }
 
 .action:hover {
@@ -148,7 +155,7 @@ html, body {
 }
 
 .peer {
-  background: #EAE4E9;
+  background: var(--accent);
   border: var(--border);
 
   padding: .5em;
@@ -161,7 +168,7 @@ html, body {
 }
 
 .hint {
-  background: #EAE4E9;
+  background: var(--accent);
   border: var(--border);
 
   height: fit-content;

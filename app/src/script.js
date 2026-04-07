@@ -6,7 +6,7 @@ const chat = document.getElementById("chat");
 let connectedPeers = new Set();
 const connectedPeersP = document.getElementById("peers");
 const hints = document.querySelectorAll(".hint");
-const peersHints = document.querySelectorAll(".peers-hint");
+const peersHints = document.querySelectorAll(".peers__hint");
 
 hints.forEach(hint => {
   hint.addEventListener("click", () => {
@@ -135,7 +135,7 @@ whenDBReady(async () => {
 })
 
 const saveAddress = async () => {
-  const address = document.getElementById("recipient-address").value.trim();
+  const address = document.getElementById("recipient__address").value.trim();
   whenDBReady(() => {
     const tx = db.transaction("usdtAddress", "readwrite");
     tx.objectStore("usdtAddress").put({
@@ -204,7 +204,7 @@ let currentPeerActions = null;
 
 const openTaskActions = (taskData) => {
   if(currentTaskActions) currentTaskActions.remove();
-  const actionsDiv = document.getElementById("task-actions")
+  const actionsDiv = document.getElementById("task__actions")
   const isOwner = taskData.createdBy === myPublicKeyBase64;
 
   const actionButtons = el("div", {
@@ -259,7 +259,7 @@ const openTaskActions = (taskData) => {
 
 const openPeerActions = (peerPublicKey) => {
   if(currentPeerActions) currentPeerActions.remove();
-  const actionsDiv = document.getElementById("peer-actions");
+  const actionsDiv = document.getElementById("peer__actions");
 
   const actionButtons = el("div", {
     className: "action-buttons"
@@ -538,8 +538,8 @@ const addTaskToDB = (task) => {
 }
 
 const createTask = async () => {
-  const taskHeader = document.getElementById("task-header").value;
-  const taskBody = document.getElementById("task-desc").value;
+  const taskHeader = document.getElementById("task__header").value;
+  const taskBody = document.getElementById("task__desc").value;
 
   const taskObj = {
     id: crypto.randomUUID(),
@@ -566,8 +566,8 @@ const createTask = async () => {
   broadcastTasks();
   updateTaskContainer();
 
-  document.getElementById("task-header").value = "";
-  document.getElementById("task-desc").value = "";
+  document.getElementById("task__header").value = "";
+  document.getElementById("task__desc").value = "";
 }
 
 const broadcastTasks = async () => {
@@ -575,4 +575,4 @@ const broadcastTasks = async () => {
   sendM({type: "b", mtype: "global", payload: Array.from(myTasks)});
 }
 
-document.getElementById("task-button").addEventListener("click", createTask);
+document.getElementById("task__button").addEventListener("click", createTask);
