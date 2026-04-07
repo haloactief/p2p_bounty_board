@@ -135,7 +135,7 @@ whenDBReady(async () => {
 })
 
 const saveAddress = async () => {
-  const address = document.getElementById("recipient__address").value.trim();
+  const address = document.getElementById("recipient-address").value.trim();
   whenDBReady(() => {
     const tx = db.transaction("usdtAddress", "readwrite");
     tx.objectStore("usdtAddress").put({

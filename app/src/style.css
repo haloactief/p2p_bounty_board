@@ -7,7 +7,7 @@
 :root {
   --border: 1px solid #30343F;
   --accent: rgb(39, 52, 105, 0.3);
-  --main: rgb(30, 39, 73, 0.2);
+  --main: rgb(30, 39, 73, 0.3);
 }
 
 html, body {
