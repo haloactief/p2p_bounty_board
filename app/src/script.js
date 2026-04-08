@@ -192,8 +192,9 @@ const el = (tag, props = {}, children = []) => {
 
 const deleteByProperty = (set, key, value) => {
   for(const item of set) {
-    if(item[key] === value);
-    set.delete(item);
+    if(item[key] === value) {
+      set.delete(item);
+    }
     return true;
   }
   return false;
@@ -215,7 +216,7 @@ const openTaskActions = (taskData) => {
       el("div", {
         textContent: "Delete",
         onclick: () => {
-          deleteByProperty(myTasks, "id")
+          deleteByProperty(myTasks, "id", taskData.id);
           updateTaskContainer();
           whenDBReady(() => {
             const tx = db.transaction(["tasks"], "readwrite");
@@ -576,3 +577,11 @@ const broadcastTasks = async () => {
 }
 
 document.getElementById("task__button").addEventListener("click", createTask);
+
+const files = import.meta.glob('./assets/images/*', {eager: true, import: 'default'});
+
+Object.values(files).forEach(file => {
+  document.getElementById("bullshit").appendChild(el("img", {
+    src: file
+  }));
+});

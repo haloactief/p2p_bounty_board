@@ -6,27 +6,34 @@
 
 :root {
   --main: rgba(150, 150, 150, .5);
+  scrollbar-width: thin;
 }
 
 html, body {
-  height: 100%;
+  min-height: 100%;
   width: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+
+  /* scrollbar-gutter: stable both-edges; */
 }
 
 body {
   color: #F6F6F6;
 
-  background: url("./background.jpg");
+  background: url("./assets/background.jpg");
   background-size: 100% 100%;
+
+  overflow: auto;
 }
 
 .content {
+  box-sizing: border-box;
+
   display: grid;
   position: relative;
   height: 100dvh;
-  width: 100dvw;
-  padding: .5em;
+  width: 100%;
+  padding: .5em .5em;
   gap: .5em;
 
   grid-template-columns: 250px 1fr 250px;
@@ -151,4 +158,24 @@ body {
 
 .clickable {
   cursor: pointer;
+}
+
+#bullshit {
+  padding: .5em;
+  border-radius: .5em;
+  background: var(--main);
+  border: 1px solid;
+  margin: 0 .5em .5em .5em;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  gap: .5em;
+}
+
+#bullshit img {
+  display: block;
+  position: relative;
+  border-radius: .5em;
+  box-shadow: 5px 5px 15px black;
+  width: 100%;
+  height: 100%;
 }
