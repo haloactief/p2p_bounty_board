@@ -225,7 +225,7 @@ const openTaskActions = (taskData) => {
           })
           sendM({type: "rb", mtype: "global", payload: taskData.id});
         },
-        className: "action clickable"
+        className: "button clickable"
       })
     ] : []),
     el("div", {
@@ -233,14 +233,14 @@ const openTaskActions = (taskData) => {
       onclick: () => {
         console.log("clicked task action")
       },
-      className: "action clickable"
+      className: "button clickable"
     }),
     el("div", {
       textContent: "action2",
       onclick: () => {
         console.log("clicked task action2")
       },
-      className: "action clickable"
+      className: "button clickable"
     })
   )
 
@@ -267,14 +267,14 @@ const openPeerActions = (peerPublicKey) => {
   actionButtons.append(
     el("div", {
       textContent: "Send message",
-      className: "clickable action",
+      className: "clickable button",
       onclick: () => {
-        document.getElementById("recipient").value = peerPublicKey;
+        document.getElementById("message__recipient").value = peerPublicKey;
       }
     }),
     el("div", {
       textContent: "Copy payment address",
-      className: "clickable action",
+      className: "clickable button",
       onclick: () => {
         navigator.clipboard.writeText(publicKeyToAddress.get(peerPublicKey));
       }
@@ -411,8 +411,8 @@ const verifySignature = async (data, signatureArr, publicKeyArr) => {
 }
 
 const sendMessage = () => {
-  const recipientId = publicKeyToPeer.get(document.getElementById("recipient").value);
-  const message = document.getElementById("message").value;
+  const recipientId = publicKeyToPeer.get(document.getElementById("message__recipient").value);
+  const message = document.getElementById("message__content").value;
   const isPrivate = recipientId ? true : false;
   const time = new Date().toLocaleTimeString();
 
@@ -430,7 +430,7 @@ const sendMessage = () => {
 
     ...(isPrivate ? [
       el("span", {
-        textContent: document.getElementById("recipient").value.slice(0, 16),
+        textContent: document.getElementById("message__recipient").value.slice(0, 16),
         className: "clickable",
         onclick: () => {
           openPeerActions(peerToPublicKey.get(recipientId));

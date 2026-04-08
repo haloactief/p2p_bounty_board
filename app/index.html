@@ -13,56 +13,60 @@
       <div>
 
         <div id="selfId"></div>
-        <div class="send-forms">
-          <div class="controls">
-            <div>Send message</div>
-            <input type="text" name="recipient" id="recipient" placeholder="recipient">
-            <input type="text" name="message" id="message" placeholder="message">
-            <button id="send-button" class="clickable">Send</button>
-          </div>
-    
-          <div class="controls">
-            <div>Create task</div>
-            <input type="text" name="task__header" id="task__header" placeholder="header">
-            <input type="text" name="task__desc" id="task__desc" placeholder="description">
-            <button id="task__button" class="clickable">Create</button>
-          </div>
+
+        <div class="controls">
+          <div>Send message</div>
+          <input type="text" name="recipient" id="message__recipient" placeholder="recipient">
+          <input type="text" name="message" id="message__content" placeholder="message">
+          <button id="send-button" class="clickable button">Send</button>
         </div>
+  
+        <div class="controls">
+          <div>Create task</div>
+          <input type="text" name="task__header" id="task__header" placeholder="header">
+          <input type="text" name="task__desc" id="task__desc" placeholder="description">
+          <button id="task__button" class="clickable button">Create</button>
+        </div>
+
         <div class="controls">
           <div>Task actions</div>
           <div id="task__actions">Click on task</div>
         </div>
+
         <div class="controls">
           <div>Peer actions</div>
           <div id="peer__actions">Click on peer</div>
         </div>
+
       </div>
 
       <div class="controls">
         <div>USDT Address</div>
         <input type="text" name="recipient-address" id="recipient-address" placeholder="Your USDT Address">
-        <button id="save-address-button">Save address</button>
+        <button id="save-address-button" class="button">Save address</button>
       </div>
 
     </div>
+
     <div class="main">
       <div class="tasks-wrap">
-        <h1>Tasks</h1>
+        <div class="tasks-wrap__header">Tasks</div>
         <div id="tasks"></div>
       </div>
       <div class="chat-wrap">
-        <h1>Chat</h1>
+        <div class="chat-wrap__header">Chat</div>
         <div id="chat"></div>
       </div>
     </div>
+
     <div class="rside">
-      <div>Peers</div>
+      <div class="peers__header">Peers</div>
       <div id="peers">
         <div>Connecting to other peers<br>(if there are any)<br>(this might take a while)</div>
-        <div class="hint peers__hint">You can click on peers that will appear here to send them messages!<br>(click on hint to dismiss it)</div>
+        <div class="hint button peers__hint clickable">You can click on peers that will appear here to send them messages!<br>(click on hint to dismiss it)</div>
       </div>
     </div>
-
+  </div>
 
   <script type="module" src="src/script.js"></script>
 </body>
