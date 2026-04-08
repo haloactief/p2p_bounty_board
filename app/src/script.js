@@ -582,6 +582,7 @@ const files = import.meta.glob('./assets/images/*', {eager: true, import: 'defau
 
 Object.values(files).forEach(file => {
   document.getElementById("bullshit").appendChild(el("img", {
-    src: file
+    src: file,
+    className: "dancing"
   }));
 });
