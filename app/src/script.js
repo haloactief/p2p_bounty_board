@@ -578,6 +578,8 @@ const broadcastTasks = async () => {
 
 document.getElementById("task__button").addEventListener("click", createTask);
 
+// BULLSHIT SECTION
+
 const files = import.meta.glob('./assets/images/*', {eager: true, import: 'default'});
 
 Object.values(files).forEach(file => {
@@ -586,3 +588,12 @@ Object.values(files).forEach(file => {
     className: "dancing"
   }));
 });
+
+document.getElementById('transparency-control').addEventListener("click", () => {
+  const root = document.querySelector(':root');
+  if(getComputedStyle(root).getPropertyValue('--primary') === '#E3E0D1A1') {
+    root.style.setProperty('--primary', '#E3E0D1');
+  } else {
+    root.style.setProperty('--primary', '#E3E0D1A1');
+  }
+})
