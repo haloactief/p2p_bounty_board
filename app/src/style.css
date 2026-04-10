@@ -61,11 +61,13 @@ body {
   gap: .5em;
 
   height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
 .chat-wrap, .tasks-wrap, #peers {
   overflow-y: auto;
+  min-height: 0;
 
   scrollbar-width: thin;
   scrollbar-color: rgba(67, 67, 67, .5) transparent;
@@ -168,6 +170,81 @@ body {
 
 .clickable {
   cursor: pointer;
+}
+
+.peer {
+  display: block;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+/* MOBILE SECTION */
+
+.fab--mobile {
+  display: none;
+  position: fixed;
+  bottom: 1em;
+  right: 1em;
+}
+
+.fab--mobile > .button {
+  padding: .5em;
+}
+
+@media (max-width: 900px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .lside,
+  .rside {
+    display: none;
+  }
+
+  .main {
+    grid-column: 1 / -1;
+  }
+
+  .fab--mobile {
+    display: block;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    background: #00000069;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal__content {
+    width: 90%;
+    max-width: 420px;
+    max-height: 85dvh;
+    background: var(--primary);
+    border: var(--border);
+    border-radius: .5em;
+    position: relative;
+    overflow-y: auto;
+    padding: 1.5em .5em .5em;
+  }
+
+  .modal__close {
+    position: absolute;
+    top: .5em;
+    right: .5em;
+    line-height: .5;
+    cursor: pointer;
+  }
+
+  .modal__panel,
+  .modal__panel > div {
+    display: flex;
+    flex-direction: column;
+    gap: .5em;
+  }
 }
 
 /* BULLSHIT SECTION */

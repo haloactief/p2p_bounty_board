@@ -1,5 +1,4 @@
 import { joinRoom, selfId } from '@trystero-p2p/torrent';
-// import WebTorrent from 'https://esm.sh/webtorrent/dist/webtorrent.min.js';
 
 const tasksContainer = document.getElementById("tasks");
 const chat = document.getElementById("chat");
@@ -312,7 +311,7 @@ const createTaskElement = (obj) => {
       el("span", {textContent: "by: "}),
       el("span", {
         textContent: obj.createdBy,
-        className: "clickable",
+        className: "clickable peer",
         onclick: () => {
           openPeerActions(obj.createdBy);
         }
@@ -357,7 +356,7 @@ const config = {
   relayUrls: [`wss://${import.meta.env.VITE_DOMAIN}/ws/`],
   rtcConfig: {
     iceServers: [
-      {  // need this if p2p fails
+      {
         urls: `turn:${import.meta.env.DOMAIN}:3478`,
         username: "stupidboy",
         credential: "hardpassword"
@@ -577,6 +576,56 @@ const broadcastTasks = async () => {
 }
 
 document.getElementById("task__button").addEventListener("click", createTask);
+
+// MOBILE SECTION
+
+const modalButtons = document.querySelectorAll(".button[data-modal-side]");
+modalButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    openSideModal(button.getAttribute('data-modal-side'));
+  });
+})
+
+const openSideModal = (side) => {
+  const modal = side === 'left' ? document.getElementById('modal--left') : document.getElementById('modal--right');
+  const source = side === 'left' ? document.querySelector('.lside') : document.querySelector('.rside');
+  const target = side === 'left' ? document.getElementById("modal--left__body") : document.getElementById("modal--right__body");
+
+  source.classList.remove('lside', 'rside');
+  source.classList.add('modal__panel');
+
+  target.innerHTML = '';
+  target.appendChild(source);
+
+  modal.style.display = 'flex';
+}
+
+const closeSideModal = (modal) => {
+    const isLeft = modal.id === 'modal--left';
+
+    const panel = modal.querySelector('.modal__panel');
+
+    const content = document.querySelector('.content');
+    content.appendChild(panel);
+
+    panel.classList.remove('modal__panel');
+    panel.classList.add(isLeft ? 'lside' : 'rside');
+
+    modal.style.display = 'none';
+}
+
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener("click", e => {
+    if(e.target === modal) closeSideModal(modal);
+  })
+})
+
+document.querySelectorAll('.modal__close').forEach(button => {
+  button.addEventListener("click", () => {
+    const modal = button.closest('.modal');
+    closeSideModal(modal);
+  })
+})
 
 // BULLSHIT SECTION
 
