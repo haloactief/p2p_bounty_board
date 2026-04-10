@@ -66,11 +66,25 @@ body {
 }
 
 .chat-wrap, .tasks-wrap, #peers {
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   min-height: 0;
 
   scrollbar-width: thin;
   scrollbar-color: rgba(67, 67, 67, .5) transparent;
+}
+
+#peers {
+  margin-top: .5em;
+}
+
+#chat, #tasks {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: .5em;
 }
 
 .lside {
@@ -101,11 +115,13 @@ body {
   border: var(--border);
 }
 
-/* .tasks-wrap__header,
+.controls,
+#selfId,
+.peers__header,
+.tasks-wrap__header,
 .chat-wrap__header {
-  position: sticky;
-  top: 0;
-} */
+  box-shadow: 2px 2px 5px black;
+}
 
 .task,
 .message {
@@ -120,15 +136,16 @@ body {
 }
 
 .button,
-.controls > input {
+.controls > input,
+.controls > textarea {
   position: relative;
   background: var(--secondary);
-  padding: .2em 0;
-  text-align: center;
+  padding: .2em;
   border-radius: .5em;
   border: var(--border);
   color: var(--text);
   font-size: small;
+  resize: none;
 }
 
 .button {
@@ -161,6 +178,13 @@ body {
   color: #B8B8B8;
 }
 
+.controls[data-controls-type="center"] {
+  flex-shrink: 0;
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 4rem);
+}
+
 .peers__header,
 .tasks-wrap__header,
 .chat-wrap__header,
@@ -178,17 +202,28 @@ body {
   word-break: break-all;
 }
 
+#peers > .peer {
+  padding: .5em;
+  background: var(--secondary);
+  border: var(--border);
+}
+
 /* MOBILE SECTION */
 
 .fab--mobile {
   display: none;
   position: fixed;
-  bottom: 1em;
+  bottom: 4.5em;
   right: 1em;
 }
 
 .fab--mobile > .button {
   padding: .5em;
+  box-shadow: 2px 2px 5px black;
+}
+
+.modal {
+  display: none;
 }
 
 @media (max-width: 900px) {
@@ -212,7 +247,7 @@ body {
   .modal {
     display: none;
     position: fixed;
-    background: #00000069;
+    background: #000000AA;
     inset: 0;
     z-index: 9999;
     align-items: center;
@@ -244,6 +279,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: .5em;
+  }
+
+  #peers {
+    margin-top: 0;
   }
 }
 

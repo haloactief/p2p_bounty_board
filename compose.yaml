@@ -9,7 +9,7 @@ services:
     build: 
       context: ./app
       args:
-        - VITE_DOMAIN=DOMAIN
+        - VITE_DOMAIN=domain
     restart: always
     ports:
       - 80:80
@@ -19,21 +19,12 @@ services:
       # - ./html:/usr/share/nginx/html
       - ./default.conf:/etc/nginx/conf.d/default.conf
 
-  # coturn:
-  #   image: coturn/coturn
-  #   restart: always
-  #   ports:
-  #     - 3478:3478
-  #     - 3478:3478/udp
-  #     - 50000-50100:50000-50100
-  #   volumes:
-  #     - ./coturn/turnserver.conf:/etc/turnserver.conf
-  
-  # dont need this
-  # db:
-  #   image: postgres:latest
-  #   restart: always
-  #   environment:
-  #     - POSTGRES_PASSWORD=admin
-  #     - POSTGRES_USER=admin
-  #     - POSTGRES_DB=p2pbb
+  coturn:
+    image: coturn/coturn
+    restart: always
+    ports:
+      - 3478:3478
+      - 3478:3478/udp
+      - 50000-50100:50000-50100
+    volumes:
+      - ./coturn/turnserver.conf:/etc/turnserver.conf

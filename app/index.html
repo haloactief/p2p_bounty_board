@@ -13,13 +13,6 @@
       <div>
 
         <div id="selfId"></div>
-
-        <div class="controls">
-          <div>Send message</div>
-          <input type="text" name="recipient" id="message__recipient" placeholder="recipient">
-          <input type="text" name="message" id="message__content" placeholder="message">
-          <button id="send-button" class="clickable button">Send</button>
-        </div>
   
         <div class="controls">
           <div>Create task</div>
@@ -61,13 +54,18 @@
       <div class="chat-wrap">
         <div class="chat-wrap__header">Chat</div>
         <div id="chat"></div>
+        <div class="controls" data-controls-type="center"> <!-- i dont know how to name this type -->
+          <input type="text" name="recipient" id="message__recipient" placeholder="recipient">
+          <textarea name="message" id="message__content" placeholder="message"></textarea>
+          <button id="send-button" class="clickable button">Send</button>
+        </div>
       </div>
     </div>
 
     <div class="rside">
       <div class="peers__header">Peers</div>
       <div id="peers">
-        <div>Connecting to other peers<br>(if there are any)<br>(this might take a while)</div>
+        <div class="hint button peers__hint clickable">Connecting to other peers<br>(if there are any)<br>(this might take a while)</div>
         <div class="hint button peers__hint clickable">You can click on peers that will appear here to send them messages!<br>(click on hint to dismiss it)</div>
       </div>
     </div>
@@ -85,7 +83,6 @@
     <div class="modal__content">
       <span class="modal__close">x</span>
       <div id="modal--left__body">
-        <h1>LEFT SIDE MODAL</h1>
       </div>
     </div>
   </div>

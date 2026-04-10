@@ -255,6 +255,8 @@ const openTaskActions = (taskData) => {
   actionsDiv.replaceChildren(actions);
 
   currentTaskActions = actions;
+
+  if(window.getComputedStyle(document.querySelector('.lside')).display === 'none') openSideModal('left');
 }
 
 const openPeerActions = (peerPublicKey) => {
@@ -292,6 +294,9 @@ const openPeerActions = (peerPublicKey) => {
   actionsDiv.replaceChildren(actions);
 
   currentPeerActions = actions;
+
+  closeSideModal(document.getElementById('modal--right'));
+  if(window.getComputedStyle(document.querySelector('.lside')).display === 'none') openSideModal('left');
 }
 
 const createTaskElement = (obj) => {
@@ -344,7 +349,7 @@ const updateConnectedPeers = () => {
       onclick: () => {
         openPeerActions(peerToPublicKey.get(peerId));
       },
-      className: "clickable peer"
+      className: "clickable peer button"
     }));
   })
 }
@@ -415,6 +420,8 @@ const sendMessage = () => {
   const message = document.getElementById("message__content").value;
   const isPrivate = recipientId ? true : false;
   const time = new Date().toLocaleTimeString();
+
+  if(message.length <= 0) return; // of course user can just change it, but who cares.
 
   if(isPrivate) {
     sendM({type: "m", mtype: "private", body: message}, recipientId);
@@ -540,6 +547,8 @@ const addTaskToDB = (task) => {
 const createTask = async () => {
   const taskHeader = document.getElementById("task__header").value;
   const taskBody = document.getElementById("task__desc").value;
+
+  if(taskHeader.length <= 0 || taskBody.length <= 0) return;
 
   const taskObj = {
     id: crypto.randomUUID(),
